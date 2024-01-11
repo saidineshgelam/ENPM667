@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Observability Test</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[syms M m1 m2 l1 l2 g
+% g = 9.81; 
+A = [0 1 0 0 0 0;
+     0 0 (-g*m1)/M 0 (-g*m2)/M 0;
+     0 0 0 1 0 0;
+     0 0 -(g*(M+m1))/(M*l1) 0 -(g*m2)/(M*l1) 0;
+     0 0 0 0 0 1;
+     0 0 -(g*m1)/(M*l2) 0 -(g*(M+m2))/(M*l2) 0];
+
+B = [0;
+    1/M;
+    0;
+    1/(M*l1);
+    0;
+    1/(M*l2)];
+
+C_01 = [1 0 0 0 0 0;  
+    0 0 0 0 0 0;  
+    0 0 0 0 0 0;   
+    0 0 0 0 0 0;   
+    0 0 0 0 0 0;   
+    0 0 0 0 0 0];
+
+C_02 = [0 0 0 0 0 0;  
+    0 0 0 0 0 0;  
+    0 0 1 0 0 0;   
+    0 0 0 0 0 0;   
+    0 0 0 0 1 0;   
+    0 0 0 0 0 0];
+
+C_03 = [1 0 0 0 0 0;  
+    0 0 0 0 0 0;  
+    0 0 0 0 0 0;   
+    0 0 0 0 0 0;   
+    0 0 0 0 1 0;   
+    0 0 0 0 0 0];
+
+C_04 = [1 0 0 0 0 0;  
+    0 0 0 0 0 0;  
+    0 0 1 0 0 0;   
+    0 0 0 0 0 0;   
+    0 0 0 0 1 0;   
+    0 0 0 0 0 0];
+
+D = 0;
+M_val = 1000;
+m1_val = 100;
+m2_val = 100;
+l1_val = 20;
+l2_val = 10;
+g_val = 9.81;
+A = double(subs(A, [M, m1, m2, l1, l2, g], [M_val, m1_val, m2_val, l1_val, l2_val, g_val]));
+B = double(subs(B, [M, m1, m2, l1, l2, g], [M_val, m1_val, m2_val, l1_val, l2_val, g_val]));]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Defining the System</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[sys1 = ss(A,B,C_01,D);
+sys2 = ss(A,B,C_02,D);
+sys3 = ss(A,B,C_03,D);
+sys4 = ss(A,B,C_04,D);]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Observability</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[O1 = obsv(sys1);
+O2 = obsv(sys2);
+O3 = obsv(sys3);
+O4 = obsv(sys4);]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Rank of Observability Matrix</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[disp(rank(O1))
+disp(rank(O2))
+disp(rank(O3))
+disp(rank(O4))
+rankarray = [rank(O1), rank(O2), rank(O3), rank(O4)];]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Print which cases are Observable</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[if(rank(O1) == 6)
+    disp('System is Observable for Output vector x(t) is only passed')
+else
+    disp('System is not Observable for Output vector x(t) is only passed')
+end
+if(rank(O2) == 6)
+    disp('System is Observable for Output vector theta1(t) and theta2(t) is only passed')
+else
+    disp('System is not Observable for Output vector theta1(t) and theta2(t) is only passed')
+end
+if(rank(O3) == 6)
+    disp('System is Observable for Output vector x(t) and theta2(t) is only passed')
+else
+    disp('System is not Observable for Output vector x(t) and theta2(t) is only passed')
+end
+if(rank(O4) == 6)
+    disp('System is Observable for Output vector x(t), theta1(t) and theta2(t) is only passed')
+else
+    disp('System is not Observable for Output vector x(t), theta1(t) and theta2(t) is only passed')
+end
+]]></w:t></w:r></w:p></w:body></w:document>

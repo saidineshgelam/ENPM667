@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[% define xdot = Ax+Bu
+% Defining symbols 
+syms M m1 m2 l1 l2 g
+% g = 9.81; 
+A = [0 1 0 0 0 0;
+     0 0 (-g*m1)/M 0 (-g*m2)/M 0;
+     0 0 0 1 0 0;
+     0 0 -(g*(M+m1))/(M*l1) 0 -(g*m2)/(M*l1) 0;
+     0 0 0 0 0 1;
+     0 0 -(g*m1)/(M*l2) 0 -(g*(M+m2))/(M*l2) 0];
+
+disp(A);
+B = [0;
+    1/M;
+    0;
+    1/(M*l1);
+    0;
+    1/(M*l2)];
+disp(B)
+syms x x_dot theta1 theta_dot_1 theta2 theta_dot_2 F
+x_t = [x;
+    x_dot;
+    theta1;
+    theta_dot_1;
+    theta2;
+    theta_dot_2];
+disp(x_t)
+y = expand(A*x_t+B*F)]]></w:t></w:r></w:p><w:p><w:pPr><w:sectPr/></w:pPr></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Controllability Matrix</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[G = [B A*B A*A*B A*A*A*B A*A*A*A*B A*A*A*A*A*B];
+disp(G);
+disp(simplify(det(G)));
+disp(rank(G));]]></w:t></w:r></w:p><w:p><w:pPr><w:sectPr/></w:pPr></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>% l1 = l2</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[G_subs = subs(G,l1,l2);
+disp('Rank of Controllability matrix with l1 = l2');
+disp(rank(G_subs));]]></w:t></w:r></w:p><w:p><w:pPr><w:sectPr/></w:pPr></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>M = 1000Kg, m1 = m2 = 100Kg, l1 = 20m and l2 = 10m substitute in A&amp;B and then calculate controllability matrix</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[M_val = 1000;
+m1_val = 100;
+m2_val = 100;
+l1_val = 20;
+l2_val = 10;
+g_val = 9.81;
+A = double(subs(A, [M, m1, m2, l1, l2, g], [M_val, m1_val, m2_val, l1_val, l2_val, g_val]));
+B = double(subs(B, [M, m1, m2, l1, l2, g], [M_val, m1_val, m2_val, l1_val, l2_val, g_val]));
+C_= ctrb(A,B);
+disp(C_);
+disp('A')
+disp(A)]]></w:t></w:r></w:p><w:p><w:pPr><w:sectPr/></w:pPr></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Controllability test</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[if(rank(C_) == size(A))
+    disp('The system is controllable');
+else
+    disp('The system is uncontrollable');
+end]]></w:t></w:r></w:p><w:p><w:pPr><w:sectPr/></w:pPr></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Setup the system</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[C = eye(6);
+D = 0;
+X_0 = [10;0;10;0;20;0];
+sys = ss(A,B,C,D);
+figure
+initial(sys,X_0)
+xlim([0,100])
+grid on]]></w:t></w:r></w:p><w:p><w:pPr><w:sectPr/></w:pPr></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>LQR Controller</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Q and R initialization</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[Q = [1000 0 0 0 0 0;  %x penalize
+     0 1000 0 0 0 0;  %x_dot penalize
+     0 0 1 0 0 0;   %theta1 penalize
+     0 0 0 1 0 0;   %theta1_dot penalize
+     0 0 0 0 1 0;   %theta2 penalize
+     0 0 0 0 0 1];  %theta2_dot penalize
+% Q =eye(6)*100;
+R = 0.001]]></w:t></w:r></w:p><w:p><w:pPr><w:sectPr/></w:pPr></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>find the value k</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[[k, P, ~] = lqr(A, B, Q, R)
+disp(k)]]></w:t></w:r></w:p><w:p><w:pPr><w:sectPr/></w:pPr></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[[v,d] = eig(A-B*k);
+disp('eigen values');
+disp(diag(d))
+disp(real(diag(d)));
+disp(v(:,1))]]></w:t></w:r></w:p><w:p><w:pPr><w:sectPr/></w:pPr></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[system_2 = ss(A-(B*k),B,C,D); %Using the K matrix to define ss
+figure
+initial(system_2,X_0)
+grid on]]></w:t></w:r></w:p></w:body></w:document>
